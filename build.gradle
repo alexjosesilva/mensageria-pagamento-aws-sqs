@@ -19,6 +19,9 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'software.amazon.awssdk:sqs' // Para SQS
+	runtimeOnly 'com.h2database:h2' // Exemplo de banco de dados H2 para testes
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
