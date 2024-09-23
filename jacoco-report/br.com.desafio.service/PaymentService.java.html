@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pt"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">san-giorgio-api</a> &gt; <a href="index.source.html" class="el_package">br.com.desafio.service</a> &gt; <span class="el_source">PaymentService.java</span></div><h1>PaymentService.java</h1><pre class="source lang-java linenums">package br.com.desafio.service;
+
+import br.com.desafio.domain.model.BillingModel;
+import br.com.desafio.domain.model.PaymentModel;
+import br.com.desafio.domain.model.SellerModel;
+import br.com.desafio.repository.BillingRepository;
+import br.com.desafio.repository.SellerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
+
+import java.math.BigDecimal;
+import java.util.Optional;
+
+@Service
+public class PaymentService {
+    @Autowired
+    private  BillingRepository billingRepository;
+    @Autowired
+    private  SellerRepository sellerRepository;
+    private final SqsClient sqsClient;
+
+    @Value(&quot;${aws.sqs.queue.partial}&quot;)
+    private String partialQueue;
+
+    @Value(&quot;${aws.sqs.queue.total}&quot;)
+    private String totalQueue;
+
+    @Value(&quot;${aws.sqs.queue.excess}&quot;)
+    private String excessQueue;
+
+    @Autowired
+<span class="fc" id="L35">    public PaymentService(BillingRepository billingRepository, SellerRepository sellerRepository, SqsClient sqsClient) {</span>
+<span class="fc" id="L36">        this.billingRepository = billingRepository;</span>
+<span class="fc" id="L37">        this.sellerRepository = sellerRepository;</span>
+<span class="fc" id="L38">        this.sqsClient = sqsClient;</span>
+<span class="fc" id="L39">    }</span>
+
+
+    public PaymentModel processPayment(Long sellerId, PaymentModel payment)  {
+
+<span class="fc" id="L44">        Optional&lt;SellerModel&gt; seller = sellerRepository.findById(sellerId);</span>
+<span class="fc" id="L45">        Optional&lt;BillingModel&gt; billing = billingRepository.findById(payment.getBillingID());</span>
+<span class="fc bfc" id="L46" title="All 4 branches covered.">        if (seller.isEmpty() || billing.isEmpty()) {</span>
+<span class="fc" id="L47">            throw new IllegalArgumentException(&quot;Seller or billing not found&quot;);</span>
+        }
+
+<span class="fc" id="L50">        BigDecimal valueOrigin = billing.get().getValueOrigin();</span>
+
+        // Iterar sobre a lista de pagamentos
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (BigDecimal valuePaid : payment.getValuePayment()){</span>
+            String status;
+
+<span class="fc bfc" id="L56" title="All 2 branches covered.">            if (valuePaid.compareTo(valueOrigin) &lt; 0) {</span>
+<span class="fc" id="L57">                status = &quot;PARTIAL&quot;;</span>
+<span class="fc" id="L58">                sendToQueueSQS(partialQueue, payment); }</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            else if (valuePaid.compareTo(valueOrigin) == 0) {</span>
+<span class="fc" id="L60">                status = &quot;TOTAL&quot;;</span>
+<span class="fc" id="L61">                sendToQueueSQS(totalQueue, payment);</span>
+            } else {
+<span class="fc" id="L63">                status = &quot;EXCEDENT&quot;;</span>
+<span class="fc" id="L64">                sendToQueueSQS(excessQueue, payment);</span>
+            }
+            // Atualizar o status do pagamento
+<span class="fc" id="L67">            payment.setStatus(status);</span>
+<span class="fc" id="L68">        }</span>
+
+<span class="fc" id="L70">        return payment;</span>
+    }
+
+    private void sendToQueueSQS(String queueUrl, PaymentModel payment) {
+<span class="fc" id="L74">        sqsClient.sendMessage(SendMessageRequest.builder()</span>
+<span class="fc" id="L75">                .queueUrl(queueUrl)</span>
+<span class="fc" id="L76">                .messageBody(payment.toString())</span>
+<span class="fc" id="L77">                .build());</span>
+<span class="fc" id="L78">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

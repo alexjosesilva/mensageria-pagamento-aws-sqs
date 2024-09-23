@@ -4,21 +4,24 @@ import br.com.desafio.domain.model.BillingModel;
 import br.com.desafio.domain.model.PaymentModel;
 import br.com.desafio.domain.model.SellerModel;
 import br.com.desafio.repository.BillingRepository;
-import br.com.desafio.repository.PaymentRepository;
 import br.com.desafio.repository.SellerRepository;
-import br.com.desafio.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import software.amazon.awssdk.services.sqs.SqsClient;
+import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+
 
 public class PaymentServiceTest {
 
@@ -29,7 +32,7 @@ public class PaymentServiceTest {
     private SellerRepository sellerRepository;
 
     @Mock
-    private PaymentRepository paymentRepository;
+    private SqsClient sqsClient;  // Adicione este mock
 
     @InjectMocks
     private PaymentService paymentService;
@@ -69,61 +72,55 @@ public class PaymentServiceTest {
 
     @Test
     public void testProcessPayment_ValidPartialPayment() {
-        // Configurando mocks para retornar um vendedor e fatura válidos
-        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
         BillingModel billing = new BillingModel();
         billing.setValueOrigin(new BigDecimal("100.00"));
-        when(billingRepository.findById(2L)).thenReturn(Optional.of(billing));
 
-        // Criando um modelo de pagamento válido com pagamento parcial
+        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
+        when(billingRepository.findById(1L)).thenReturn(Optional.of(billing));
+
         PaymentModel paymentModel = new PaymentModel();
-        paymentModel.setBillingID(2L);
+        paymentModel.setBillingID(1L);
         paymentModel.setValuePayment(List.of(new BigDecimal("50.00")));
 
-        // Executando o método de pagamento
         paymentService.processPayment(1L, paymentModel);
 
-        // Verificando se o pagamento foi salvo no repositório
-        verify(paymentRepository, times(1)).save(any(PaymentModel.class));
+        verify(sqsClient, times(1)).sendMessage((SendMessageRequest) any()); // Verifica se o método sendMessage foi chamado
+        assertEquals("PARTIAL", paymentModel.getStatus());
     }
 
     @Test
     public void testProcessPayment_ValidTotalPayment() {
-        // Configurando mocks para retornar um vendedor e fatura válidos
-        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
         BillingModel billing = new BillingModel();
         billing.setValueOrigin(new BigDecimal("100.00"));
-        when(billingRepository.findById(2L)).thenReturn(Optional.of(billing));
 
-        // Criando um modelo de pagamento válido com pagamento total
+        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
+        when(billingRepository.findById(1L)).thenReturn(Optional.of(billing));
+
         PaymentModel paymentModel = new PaymentModel();
-        paymentModel.setBillingID(2L);
+        paymentModel.setBillingID(1L);
         paymentModel.setValuePayment(List.of(new BigDecimal("100.00")));
 
-        // Executando o método de pagamento
         paymentService.processPayment(1L, paymentModel);
 
-        // Verificando se o pagamento foi salvo no repositório
-        verify(paymentRepository, times(1)).save(any(PaymentModel.class));
+        verify(sqsClient, times(1)).sendMessage((SendMessageRequest) any()); // Verifica se o método sendMessage foi chamado
+        assertEquals("TOTAL", paymentModel.getStatus());
     }
 
     @Test
     public void testProcessPayment_ValidExcessPayment() {
-        // Configurando mocks para retornar um vendedor e fatura válidos
-        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
         BillingModel billing = new BillingModel();
         billing.setValueOrigin(new BigDecimal("100.00"));
-        when(billingRepository.findById(2L)).thenReturn(Optional.of(billing));
 
-        // Criando um modelo de pagamento válido com pagamento excedente
+        when(sellerRepository.findById(1L)).thenReturn(Optional.of(new SellerModel()));
+        when(billingRepository.findById(1L)).thenReturn(Optional.of(billing));
+
         PaymentModel paymentModel = new PaymentModel();
-        paymentModel.setBillingID(2L);
+        paymentModel.setBillingID(1L);
         paymentModel.setValuePayment(List.of(new BigDecimal("150.00")));
 
-        // Executando o método de pagamento
         paymentService.processPayment(1L, paymentModel);
 
-        // Verificando se o pagamento foi salvo no repositório
-        verify(paymentRepository, times(1)).save(any(PaymentModel.class));
+        verify(sqsClient, times(1)).sendMessage((SendMessageRequest) any()); // Verifica se o método sendMessage foi chamado
+        assertEquals("EXCEDENT", paymentModel.getStatus());
     }
 }
