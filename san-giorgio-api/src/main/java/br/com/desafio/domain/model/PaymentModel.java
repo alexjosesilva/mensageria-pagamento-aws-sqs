@@ -1,5 +1,7 @@
 package br.com.desafio.domain.model;
 
+import jakarta.persistence.Entity;
+
 import java.math.BigDecimal;
 import java.util.List;
 
