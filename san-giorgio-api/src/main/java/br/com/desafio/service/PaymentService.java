@@ -47,17 +47,6 @@ public class PaymentService {
             throw new IllegalArgumentException("Seller or billing not found");
         }
 
-//        // Inicializando manualmente o SellerModel
-//        SellerModel seller = new SellerModel();
-//        seller.setSellerId(sellerId); // Defina o ID do vendedor
-//        seller.setNameSeller("Nome do Vendedor"); // Defina outros atributos conforme necessário
-//
-//        // Inicializando manualmente o BillingModel
-//        BillingModel billing = new BillingModel();
-//        billing.setBillingId(payment.getBillingID()); // Defina o ID da fatura
-//        billing.setValueOrigin(new BigDecimal("100.00")); // Defina o valor original da fatura
-
-
         BigDecimal valueOrigin = billing.get().getValueOrigin();
         BigDecimal valuePaid = payment.getValuePayment();
         String status;
