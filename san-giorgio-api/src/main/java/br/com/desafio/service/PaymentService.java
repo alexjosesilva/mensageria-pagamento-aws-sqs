@@ -48,21 +48,25 @@ public class PaymentService {
         }
 
         BigDecimal valueOrigin = billing.get().getValueOrigin();
-        BigDecimal valuePaid = payment.getValuePayment();
-        String status;
 
-        if (valuePaid.compareTo(valueOrigin) < 0) {
-            status = "PARTIAL";
-            sendToQueueSQS(partialQueue, payment); }
-        else if (valuePaid.compareTo(valueOrigin) == 0) {
-            status = "TOTAL";
-            sendToQueueSQS(totalQueue, payment);
-        } else {
-            status = "EXCEDENT";
-            sendToQueueSQS(excessQueue, payment);
+        // Iterar sobre a lista de pagamentos
+        for (BigDecimal valuePaid : payment.getValuePayment()){
+            String status;
+
+            if (valuePaid.compareTo(valueOrigin) < 0) {
+                status = "PARTIAL";
+                sendToQueueSQS(partialQueue, payment); }
+            else if (valuePaid.compareTo(valueOrigin) == 0) {
+                status = "TOTAL";
+                sendToQueueSQS(totalQueue, payment);
+            } else {
+                status = "EXCEDENT";
+                sendToQueueSQS(excessQueue, payment);
+            }
+            // Atualizar o status do pagamento
+            payment.setStatus(status);
         }
 
-        payment.setStatus(status);
         return payment;
     }
 

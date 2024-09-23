@@ -1,5 +1,5 @@
 
-# Projeto Desafio San Giorgio
+# Projeto Pagamento com Mensageria AWS SQS
 
 ## Descrição
 
