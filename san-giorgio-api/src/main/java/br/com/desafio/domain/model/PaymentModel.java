@@ -1,10 +1,11 @@
 package br.com.desafio.domain.model;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PaymentModel {
     private Long billingID;
-    private BigDecimal valuePayment;
+    private List<BigDecimal> valuePayment;
     private String status;
 
     public Long getBillingID() {
@@ -19,11 +20,11 @@ public class PaymentModel {
         this.status = status;
     }
 
-    public BigDecimal getValuePayment() {
+    public List<BigDecimal> getValuePayment() {
         return valuePayment;
     }
 
-    public void setValuePayment(BigDecimal valuePayment) {
+    public void setValuePayment(List<BigDecimal> valuePayment) {
         this.valuePayment = valuePayment;
     }
 

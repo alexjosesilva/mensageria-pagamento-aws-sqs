@@ -4,7 +4,8 @@ WORKDIR /app
 
 # Copia os arquivos de build.gradle e settings.gradle (se houver)
 COPY build.gradle /app/
-COPY settings.gradle /app/  # Se você tiver um arquivo settings.gradle
+COPY settings.gradle /app/
+# Se você tiver um arquivo settings.gradle
 
 # Baixa as dependências do Gradle
 RUN gradle build --no-daemon || return 0
