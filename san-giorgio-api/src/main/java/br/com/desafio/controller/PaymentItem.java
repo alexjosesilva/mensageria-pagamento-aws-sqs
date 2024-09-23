@@ -19,4 +19,6 @@ public class PaymentItem {
     private BigDecimal paymentValue;
     @JsonProperty("payment_status")
     private String paymentStatus;
+
+
 }
