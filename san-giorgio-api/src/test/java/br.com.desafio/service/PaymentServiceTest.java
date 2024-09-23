@@ -1,7 +1,10 @@
+package br.com.desafio.service;
+
 import br.com.desafio.domain.model.BillingModel;
 import br.com.desafio.domain.model.PaymentModel;
 import br.com.desafio.domain.model.SellerModel;
 import br.com.desafio.repository.BillingRepository;
+import br.com.desafio.repository.PaymentRepository;
 import br.com.desafio.repository.SellerRepository;
 import br.com.desafio.service.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
