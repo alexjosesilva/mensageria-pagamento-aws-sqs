@@ -4,13 +4,13 @@ import br.com.desafio.domain.model.BillingModel;
 import br.com.desafio.domain.model.PaymentModel;
 import br.com.desafio.domain.model.SellerModel;
 import br.com.desafio.repository.BillingRepository;
-import br.com.desafio.repository.PaymentRepository;
 import br.com.desafio.repository.SellerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+
 public class PaymentServiceTest {
 
     @Mock
@@ -29,9 +30,6 @@ public class PaymentServiceTest {
 
     @Mock
     private SellerRepository sellerRepository;
-
-    @Mock
-    private PaymentRepository paymentRepository;
 
     @Mock
     private SqsClient sqsClient;  // Adicione este mock
