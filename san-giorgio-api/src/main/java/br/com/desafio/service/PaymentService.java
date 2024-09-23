@@ -43,6 +43,7 @@ public class PaymentService {
 
         Optional<SellerModel> seller = sellerRepository.findById(sellerId);
         Optional<BillingModel> billing = billingRepository.findById(payment.getBillingID());
+
         if (seller.isEmpty() || billing.isEmpty()) {
             throw new IllegalArgumentException("Seller or billing not found");
         }
@@ -63,7 +64,6 @@ public class PaymentService {
                 status = "EXCEDENT";
                 sendToQueueSQS(excessQueue, payment);
             }
-            // Atualizar o status do pagamento
             payment.setStatus(status);
         }
 
